@@ -1,22 +1,17 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+import os
+import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import smtplib
-import os
 from datetime import datetime
-
-app = Flask(__name__)
-CORS(app)
+from flask import jsonify, Request
 
 SMTP_USER = os.getenv("smtp_user")
 SMTP_PASS = os.getenv("smtp_pass")
 
-if not SMTP_USER or not SMTP_PASS:
-    raise ValueError("Error interno de la aplicación, intentalo de nuevo mas tarde.")
+def handler(request: Request):
+    if request.method == "GET":
+        return jsonify({"status": "OK", "message": "Servidor funcionando correctamente"})
 
-@app.route("/api/send_email", methods=["POST"])
-def send_email():
     try:
         data = request.get_json()
         
@@ -24,15 +19,12 @@ def send_email():
         email = data.get("email", "").strip()
         asunto = data.get("asunto", "").strip()
         mensaje = data.get("mensaje", "").strip()
-        
+
         if not all([nombre, email, asunto, mensaje]):
-            return jsonify({
-                "success": False, 
-                "error": "Todos los campos son obligatorios"
-            }), 400
-        
+            return jsonify({"success": False, "error": "Todos los campos son obligatorios"}), 400
+
         fecha_hora = datetime.now().strftime("%d de %B de %Y a las %H:%M")
-        
+
         html = f"""
         <!DOCTYPE html>
         <html lang="es">
@@ -126,33 +118,19 @@ def send_email():
         </body>
         </html>
         """
-
         
         msg = MIMEMultipart("alternative")
         msg["Subject"] = f"Nuevo Contacto: {asunto}"
         msg["From"] = f"Julio.com <{SMTP_USER}>"
         msg["To"] = SMTP_USER
         msg["Reply-To"] = email
-        
         msg.attach(MIMEText(html, "html"))
-        
+
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(SMTP_USER, SMTP_PASS)
             server.send_message(msg)
-        
-        return jsonify({
-            "success": True, 
-            "message": "Mensaje enviado correctamente. Te responderé pronto."
-        })
-        
-    except ValueError as ve:
-        return jsonify({"success": False, "error": str(ve)}), 400
-    except smtplib.SMTPException as se:
-        return jsonify({"success": False, "error": f"Error al enviar el correo: {str(se)}"}), 500
+
+        return jsonify({"success": True, "message": "Mensaje enviado correctamente"})
+
     except Exception as e:
-        return jsonify({"success": False, "error": f"Error inesperado: {str(e)}"}), 500
-
-
-@app.route("/api/health", methods=["GET"])
-def health_check():
-    return jsonify({"status": "OK", "message": "Servidor funcionando correctamente"})
+        return jsonify({"success": False, "error": str(e)}), 500
