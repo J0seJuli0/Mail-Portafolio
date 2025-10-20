@@ -1,20 +1,24 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
-from flask import jsonify, Request
+
+app = Flask(__name__)
+CORS(app)
 
 SMTP_USER = os.getenv("smtp_user")
 SMTP_PASS = os.getenv("smtp_pass")
 
-def handler(request: Request):
-    if request.method == "GET":
-        return jsonify({"status": "OK", "message": "Servidor funcionando correctamente"})
+if not SMTP_USER or not SMTP_PASS:
+    raise ValueError("Variables de entorno smtp_user/smtp_pass no configuradas")
 
+@app.route("/api/send_email", methods=["POST"])
+def send_email():
     try:
         data = request.get_json()
-        
         nombre = data.get("nombre", "").strip()
         email = data.get("email", "").strip()
         asunto = data.get("asunto", "").strip()
@@ -24,6 +28,7 @@ def handler(request: Request):
             return jsonify({"success": False, "error": "Todos los campos son obligatorios"}), 400
 
         fecha_hora = datetime.now().strftime("%d de %B de %Y a las %H:%M")
+
 
         html = f"""
         <!DOCTYPE html>
@@ -118,7 +123,7 @@ def handler(request: Request):
         </body>
         </html>
         """
-        
+
         msg = MIMEMultipart("alternative")
         msg["Subject"] = f"Nuevo Contacto: {asunto}"
         msg["From"] = f"Julio.com <{SMTP_USER}>"
@@ -134,3 +139,7 @@ def handler(request: Request):
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/health", methods=["GET"])
+def health_check():
+    return jsonify({"status": "OK", "message": "Servidor funcionando correctamente"})
