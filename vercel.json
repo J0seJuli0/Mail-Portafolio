@@ -4,7 +4,7 @@
     { "src": "api/send_email.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/send_email.py" }
+    { "src": "/api/send_email", "dest": "/api/send_email.py" }
   ],
   "env": {
     "SMTP_USER": "@smtp_user",
