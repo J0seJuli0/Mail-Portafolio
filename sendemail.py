@@ -129,10 +129,10 @@ def send_email():
                 "Content-Type": "application/json",
             },
             json={
-                "from": "Portafolio Julio <onboarding@resend.dev>",
+                "from": "Julio.com <onboarding@resend.dev>",
                 "to": [SMTP_USER],
                 "reply_to": email,
-                "subject": f"Nuevo Contacto: {asunto}",
+                "subject": f"{asunto}",
                 "html": html,
             },
         )
@@ -140,7 +140,10 @@ def send_email():
         if response.status_code not in [200, 202]:
             return jsonify({"success": False, "error": response.text}), 500
 
-        return jsonify({"success": True, "message": "Mensaje enviado correctamente ✅"}), 200
+        return jsonify({
+            "success": True,
+            "message": "¡Tu mensaje fue enviado con éxito! :) Pronto me pondré en contacto contigo. ¡Gracias por escribir!"
+        }), 200
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
