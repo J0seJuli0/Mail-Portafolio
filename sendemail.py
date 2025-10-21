@@ -142,7 +142,7 @@ def send_email():
 
         return jsonify({
             "success": True,
-            "message": "¡Tu mensaje fue enviado con éxito! :) Pronto me pondré en contacto contigo. ¡Gracias por escribir!"
+            "message": "Pronto me pondré en contacto contigo. ¡Gracias por escribir!"
         }), 200
 
     except Exception as e:
