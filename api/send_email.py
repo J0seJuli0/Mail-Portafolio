@@ -3,7 +3,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
-from vercel import Request, Response  # Vercel usa esto
+from vercel import Request, Response
 
 SMTP_USER = os.getenv("smtp_user")
 SMTP_PASS = os.getenv("smtp_pass")
@@ -12,7 +12,7 @@ def handler(request: Request):
     # Health check
     if request.method == "GET":
         return Response({"status": "OK", "message": "Servidor funcionando correctamente"}, status=200)
-    
+
     # POST → enviar correo
     try:
         data = request.json
@@ -23,7 +23,7 @@ def handler(request: Request):
 
         if not all([nombre, email, asunto, mensaje]):
             return Response({"success": False, "error": "Todos los campos son obligatorios"}, status=400)
-        
+
         fecha_hora = datetime.now().strftime("%d de %B de %Y a las %H:%M")
 
         html = f"""
