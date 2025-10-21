@@ -1,9 +1,10 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/send_email.py", "use": "@vercel/python" }
+    { "src": "sendemail.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/api/send_email", "dest": "api/send_email.py" }
-  ]
+    { "src": "/(.*)", "dest": "sendemail.py" }
+  ],
+  "env": { "FLASK_ENV": "production" }
 }
