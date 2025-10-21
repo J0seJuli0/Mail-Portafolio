@@ -1,10 +1,14 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "sendemail.py", "use": "@vercel/python" }
-  ],
+  "functions": {
+    "send_email.py": {
+      "runtime": "python3.11"
+    }
+  },
   "routes": [
-    { "src": "/(.*)", "dest": "sendemail.py" }
-  ],
-  "env": { "FLASK_ENV": "production" }
+    {
+      "src": "send_email",
+      "dest": "send_email.py"
+    }
+  ]
 }
