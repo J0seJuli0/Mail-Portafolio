@@ -1,6 +1,5 @@
 import os
 import requests
-from email.mime.text import MIMEText
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -8,8 +7,9 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-RESEND_API_KEY = os.getenv("resend_api_key")
-SMTP_USER = os.getenv("smtp_pass")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+SMTP_USER = os.getenv("SMTP_USER")
+
 @app.route("/")
 def home():
     return jsonify({"status": "OK", "message": "Servidor funcionando correctamente"})
@@ -122,7 +122,6 @@ def send_email():
         </html>
         """
 
-        # --- Envío con la API de Resend ---
         response = requests.post(
             "https://api.resend.com/emails",
             headers={
@@ -131,14 +130,14 @@ def send_email():
             },
             json={
                 "from": f"Portafolio Julio <{SMTP_USER}>",
-                "to": [SMTP_USER],  # te llega a ti
+                "to": [SMTP_USER],
                 "reply_to": email,
                 "subject": f"Nuevo Contacto: {asunto}",
                 "html": html,
             },
         )
 
-        if response.status_code != 200:
+        if response.status_code not in [200, 202]:
             return jsonify({"success": False, "error": response.text}), 500
 
         return jsonify({"success": True, "message": "Mensaje enviado correctamente ✅"}), 200
