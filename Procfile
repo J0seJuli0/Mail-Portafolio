@@ -1,1 +1,1 @@
-web: gunicorn sendmail:app
+web: gunicorn sendemail:app
