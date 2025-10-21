@@ -1,14 +1,8 @@
 {
   "version": 2,
   "functions": {
-    "api/send_email.py": {
+    "api/*.py": {
       "runtime": "python3.11"
     }
-  },
-  "routes": [
-    {
-      "src": "/api/send_email",
-      "dest": "/api/send_email.py"
-    }
-  ]
+  }
 }
