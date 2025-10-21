@@ -129,7 +129,7 @@ def send_email():
                 "Content-Type": "application/json",
             },
             json={
-                "from": f"Portafolio Julio <{SMTP_USER}>",
+                "from": "Portafolio Julio <onboarding@resend.dev>",
                 "to": [SMTP_USER],
                 "reply_to": email,
                 "subject": f"Nuevo Contacto: {asunto}",
