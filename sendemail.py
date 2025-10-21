@@ -1,7 +1,6 @@
 import os
-import smtplib
+import requests
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -9,10 +8,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Variables de entorno (Render → Dashboard → Environment)
-SMTP_USER = os.getenv("smtp_user")
-SMTP_PASS = os.getenv("smtp_pass")
-
+RESEND_API_KEY = os.getenv("resend_api_key")
+SMTP_USER = os.getenv("smtp_pass")
 @app.route("/")
 def home():
     return jsonify({"status": "OK", "message": "Servidor funcionando correctamente"})
@@ -125,18 +122,26 @@ def send_email():
         </html>
         """
 
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"Nuevo Contacto: {asunto}"
-        msg["From"] = f"Julio.com <{SMTP_USER}>"
-        msg["To"] = SMTP_USER
-        msg["Reply-To"] = email
-        msg.attach(MIMEText(html, "html"))
+        # --- Envío con la API de Resend ---
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": f"Portafolio Julio <{SMTP_USER}>",
+                "to": [SMTP_USER],  # te llega a ti
+                "reply_to": email,
+                "subject": f"Nuevo Contacto: {asunto}",
+                "html": html,
+            },
+        )
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(SMTP_USER, SMTP_PASS)
-            server.send_message(msg)
+        if response.status_code != 200:
+            return jsonify({"success": False, "error": response.text}), 500
 
-        return jsonify({"success": True, "message": "Mensaje enviado correctamente"}), 200
+        return jsonify({"success": True, "message": "Mensaje enviado correctamente ✅"}), 200
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
